@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "id": "attributed",
+  "version": "${version}",
+  "name": "Attributed",
+  "description": "Bunch o' attributes.",
+  "authors": [
+    "Draylar"
+  ],
+  "license": "CC0-1.0",
+  "icon": "assets/attributed/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "draylar.attributed.Attributed"
+    ]
+  },
+  "mixins": [
+    "attributed.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.9.2+build.206",
+    "fabric": "*",
+    "minecraft": "1.16.2"
+  }
+}
