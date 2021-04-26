@@ -15,7 +15,7 @@ public interface CriticalHitEvents {
                 TypedActionResult<Double> result = TypedActionResult.pass(chance);
 
                 for(Before event : listeners) {
-                    result = event.beforeCriticalHit(player, target, stack, chance);
+                    result = event.beforeCriticalHit(player, target, stack, result.getValue());
 
                     if (result.getResult() != ActionResult.PASS) {
                         return result;
