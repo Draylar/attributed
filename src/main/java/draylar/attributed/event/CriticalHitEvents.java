@@ -2,28 +2,69 @@ package draylar.attributed.event;
 
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.ActionResult;
+import net.minecraft.util.TypedActionResult;
 
 // NYI
 public interface CriticalHitEvents {
 
-    Event<PreCriticalHit> PRE = EventFactory.createArrayBacked(PreCriticalHit.class,
-            listeners -> player -> {
-                for(PreCriticalHit event : listeners) {
-                    ActionResult result = event.preCriticalHit(player);
+    Event<Before> BEFORE = EventFactory.createArrayBacked(Before.class,
+            listeners -> (player, chance) -> {
+                TypedActionResult<Double> result = TypedActionResult.pass(chance);
 
-                    if (result != ActionResult.PASS) {
+                for(Before event : listeners) {
+                    result = event.beforeCriticalHit(player, chance);
+
+                    if (result.getResult() != ActionResult.PASS) {
                         return result;
                     }
                 }
 
-                return ActionResult.PASS;
-            }
-    );
+                return result;
+            });
+
+    Event<After> AFTER = EventFactory.createArrayBacked(After.class,
+            listeners -> player -> {
+                for(After event : listeners) {
+                    event.afterCriticalHit(player);
+                }
+            });
 
     @FunctionalInterface
-    interface PreCriticalHit {
-        ActionResult preCriticalHit(PlayerEntity player);
+    interface Before {
+        /**
+         * Called before the random chance for a critical hit is tested. A critical hit applies a 50% damage bonus to an attack.
+         *
+         * <p>
+         * {@code chance} represents the random chance the critical hit will succeed, with 1 being 100% (always crit), and 0 being 0% (no crit).
+         * Listeners can adjust the returned double to modify the chance a critical hit lands.
+         * This event is called after Attribute Modifiers are applied,
+         *      so {@code chance} starts as the calculated value of the {@link draylar.attributed.CustomEntityAttributes#CRIT_CHANCE} attribute on the player.
+         *
+         * <p>
+         * To account for overfill mechanics and tools that want to ensure a critical hit occurs (or does not occur),
+         *   {@code chance} is not capped between 0 and 1 between listener calls. Values <0 or >1 may be present.
+         *
+         * <p>
+         * As with all events that use {@link TypedActionResult} or {@link ActionResult}, the result returned impacts future listener calls.
+         * <ul>
+         *     <li>{@link ActionResult#SUCCESS} will cancel all future listeners and roll the specified chance.</li>
+         *     <li>{@link ActionResult#FAIL} will cancel all future listeners and deny a critical hit from occuring.</li>
+         *     <li>{@link ActionResult#PASS} will send the specified chance to the next listener. If all listeners return {@link ActionResult#PASS}, {@link ActionResult#SUCCESS} is assumed.</li>
+         * </ul>
+         *
+         * @param player player that is attempting to land a critical hit
+         * @param chance the current chance of the critical hit succeeding
+         * @return a {@link TypedActionResult} that describes whether the critical hit can continue,
+         *      with the attached double describing the chance of the critical hit if the returned {@link ActionResult} is not {@link ActionResult#FAIL}
+         */
+        TypedActionResult<Double> beforeCriticalHit(PlayerEntity player, double chance);
+    }
+
+    @FunctionalInterface
+    interface After {
+        void afterCriticalHit(PlayerEntity player, LivingEntity against);
     }
 }

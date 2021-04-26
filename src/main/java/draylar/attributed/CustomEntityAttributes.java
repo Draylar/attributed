@@ -7,7 +7,7 @@ import net.minecraft.util.registry.Registry;
 public class CustomEntityAttributes {
 
     public static final EntityAttribute DIG_SPEED = register("generic.dig_speed", new ClampedEntityAttribute("attribute.name.generic.dig_speed", 0.0D, 0.0D, 2048.0D).setTracked(true));
-    public static final EntityAttribute CRIT_CHANCE = register("generic.crit_chance", new ClampedEntityAttribute("attribute.name.generic.crit_chance", 0.0D, 0.0D, 1D).setTracked(true));
+    public static final EntityAttribute CRIT_CHANCE = register("generic.crit_chance", new ClampedEntityAttribute("attribute.name.generic.crit_chance", 0.0D, 0.0D, 5.0D).setTracked(true));
 
     private static EntityAttribute register(String id, EntityAttribute attribute) {
         return Registry.register(Registry.ATTRIBUTE, Attributed.id(id), attribute);

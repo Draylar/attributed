@@ -1,5 +1,5 @@
 plugins {
-    id 'fabric-loom' version '0.5.22'
+    id 'fabric-loom' version '0.7-SNAPSHOT'
     id 'maven-publish'
 }
 
@@ -11,6 +11,7 @@ version = project.mod_version + "-" + project.minecraft_version
 group = project.maven_group
 
 minecraft {
+    accessWidener = file("src/main/resources/attributed.accesswidener")
 }
 
 dependencies {

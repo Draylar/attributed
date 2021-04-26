@@ -15,6 +15,7 @@
       "draylar.attributed.Attributed"
     ]
   },
+  "accessWidener": "attributed.accesswidener",
   "mixins": [
     "attributed.mixins.json"
   ],
