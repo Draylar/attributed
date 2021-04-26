@@ -2,20 +2,20 @@ package draylar.attributed.event;
 
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
-import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.TypedActionResult;
 
-// NYI
 public interface CriticalHitEvents {
 
     Event<Before> BEFORE = EventFactory.createArrayBacked(Before.class,
-            listeners -> (player, chance) -> {
+            listeners -> (player, target, stack, chance) -> {
                 TypedActionResult<Double> result = TypedActionResult.pass(chance);
 
                 for(Before event : listeners) {
-                    result = event.beforeCriticalHit(player, chance);
+                    result = event.beforeCriticalHit(player, target, stack, chance);
 
                     if (result.getResult() != ActionResult.PASS) {
                         return result;
@@ -26,9 +26,9 @@ public interface CriticalHitEvents {
             });
 
     Event<After> AFTER = EventFactory.createArrayBacked(After.class,
-            listeners -> player -> {
+            listeners -> (player, target, stack) -> {
                 for(After event : listeners) {
-                    event.afterCriticalHit(player);
+                    event.afterCriticalHit(player, target, stack);
                 }
             });
 
@@ -56,15 +56,24 @@ public interface CriticalHitEvents {
          * </ul>
          *
          * @param player player that is attempting to land a critical hit
+         * @param target the entity being attacked by the player
+         * @param stack the stack currently held in the player's main hand
          * @param chance the current chance of the critical hit succeeding
          * @return a {@link TypedActionResult} that describes whether the critical hit can continue,
          *      with the attached double describing the chance of the critical hit if the returned {@link ActionResult} is not {@link ActionResult#FAIL}
          */
-        TypedActionResult<Double> beforeCriticalHit(PlayerEntity player, double chance);
+        TypedActionResult<Double> beforeCriticalHit(PlayerEntity player, Entity target, ItemStack stack, double chance);
     }
 
     @FunctionalInterface
     interface After {
-        void afterCriticalHit(PlayerEntity player, LivingEntity against);
+        /**
+         * Called after a player lands a critical hit.
+         *
+         * @param player player that is attempting to land a critical hit
+         * @param target the entity being attacked by the player
+         * @param stack the stack in the player's main hand, which was used to land the critical hit
+         */
+        void afterCriticalHit(PlayerEntity player, Entity target, ItemStack stack);
     }
 }

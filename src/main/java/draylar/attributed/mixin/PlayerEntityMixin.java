@@ -2,6 +2,7 @@ package draylar.attributed.mixin;
 
 import draylar.attributed.CustomEntityAttributes;
 import draylar.attributed.event.CriticalHitEvents;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.EntityAttributeInstance;
@@ -11,9 +12,13 @@ import net.minecraft.util.ActionResult;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.Slice;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 @Mixin(PlayerEntity.class)
 public abstract class PlayerEntityMixin extends LivingEntity {
@@ -52,6 +57,16 @@ public abstract class PlayerEntityMixin extends LivingEntity {
         return f;
     }
 
+    @Unique
+    private Entity attributed_cachedTarget;
+
+    @Inject(
+            method = "attack",
+            at = @At("HEAD"))
+    private void storeContext(Entity target, CallbackInfo ci) {
+        attributed_cachedTarget = target;
+    }
+
     @ModifyVariable(
             method = "attack",
             at = @At(
@@ -77,7 +92,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
         }
 
         // Call event listeners to adjust the critical hit ratio/value.
-        TypedActionResult<Double> result = CriticalHitEvents.BEFORE.invoker().beforeCriticalHit((PlayerEntity) (Object) this, customChance);
+        TypedActionResult<Double> result = CriticalHitEvents.BEFORE.invoker().beforeCriticalHit((PlayerEntity) (Object) this, attributed_cachedTarget, getMainHandStack(), customChance);
 
         // If the result failed, the chance is now 0.
         if(result.getResult().equals(ActionResult.FAIL)) {
@@ -87,5 +102,15 @@ public abstract class PlayerEntityMixin extends LivingEntity {
         }
 
         return critical || world.random.nextDouble() < customChance;
+    }
+
+    @Inject(
+            method = "attack",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerEntity;getMovementSpeed()F"),
+            locals = LocalCapture.CAPTURE_FAILHARD)
+    private void postCriticalHit(Entity target, CallbackInfo ci, float f, float h, boolean bl, boolean bl2, int j, boolean wasCritical, boolean bl4, double d) {
+        if(wasCritical) {
+            CriticalHitEvents.AFTER.invoker().afterCriticalHit((PlayerEntity) (Object) this, attributed_cachedTarget, getMainHandStack());
+        }
     }
 }
