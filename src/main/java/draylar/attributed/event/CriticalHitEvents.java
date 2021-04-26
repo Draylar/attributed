@@ -59,8 +59,8 @@ public interface CriticalHitEvents {
          * <p>
          * As with all events that use {@link TypedActionResult} or {@link ActionResult}, the result returned impacts future listener calls.
          * <ul>
-         *     <li>{@link ActionResult#SUCCESS} will cancel all future listeners and roll the specified chance.</li>
-         *     <li>{@link ActionResult#FAIL} will cancel all future listeners and deny a critical hit from occuring.</li>
+         *     <li>{@link ActionResult#SUCCESS} will cancel all future listeners and cause the critical hit to land.</li>
+         *     <li>{@link ActionResult#FAIL} will cancel all future listeners and deny a critical hit from occurring.</li>
          *     <li>{@link ActionResult#PASS} will send the specified chance to the next listener. If all listeners return {@link ActionResult#PASS}, {@link ActionResult#SUCCESS} is assumed.</li>
          * </ul>
          *

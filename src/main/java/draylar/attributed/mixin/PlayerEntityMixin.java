@@ -94,6 +94,8 @@ public abstract class PlayerEntityMixin extends LivingEntity {
         // If the result failed, the chance is now 0.
         if(result.getResult().equals(ActionResult.FAIL)) {
             customChance = 0;
+        } else if(result.getResult().equals(ActionResult.SUCCESS)) {
+            customChance = 1;
         } else {
             customChance = result.getValue();
         }
