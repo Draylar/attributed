@@ -105,9 +105,9 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 
     @Inject(
             method = "attack",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerEntity;getMovementSpeed()F"),
+            at = @At(value = "FIELD", target = "Lnet/minecraft/entity/player/PlayerEntity;horizontalSpeed:F"),
             locals = LocalCapture.CAPTURE_FAILHARD)
-    private void postCriticalHit(Entity target, CallbackInfo ci, float f, float h, boolean bl, boolean bl2, int j, boolean wasCritical, boolean bl4, double d) {
+    private void postCriticalHit(Entity target, CallbackInfo ci, float f, float h, boolean bl, boolean bl2, int j, boolean wasCritical, boolean bl4) {
         if(wasCritical) {
             CriticalHitEvents.AFTER.invoker().afterCriticalHit((PlayerEntity) (Object) this, attributed_cachedTarget, getMainHandStack());
         }

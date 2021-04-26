@@ -11,6 +11,8 @@ import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.registry.Registry;
 
@@ -42,6 +44,13 @@ public class AttributedDevelopment implements ModInitializer {
             }
 
             return chance;
+        });
+
+        // If the player lands a critical hit with an Emerald, play a sound...
+        CriticalHitEvents.AFTER.register((player, target, stack) -> {
+            if(stack.getItem().equals(Items.EMERALD)) {
+                player.world.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP, SoundCategory.PLAYERS, 1.0f, 1.0f);
+            }
         });
     }
 
