@@ -1,2 +1,7 @@
 # Project exclude paths
 /.gradle/
+.idea/
+logs/
+run/
+build/
+attributed.iml
