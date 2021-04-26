@@ -13,10 +13,7 @@ import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyVariable;
-import org.spongepowered.asm.mixin.injection.Slice;
+import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
@@ -112,5 +109,19 @@ public abstract class PlayerEntityMixin extends LivingEntity {
         if(wasCritical) {
             CriticalHitEvents.AFTER.invoker().afterCriticalHit((PlayerEntity) (Object) this, attributed_cachedTarget, getMainHandStack());
         }
+    }
+
+    @ModifyConstant(
+            method = "attack",
+            constant = @Constant(floatValue = 1.5f))
+    private float adjustCriticalHitModifier(float original) {
+        EntityAttributeInstance instance = this.getAttributeInstance(CustomEntityAttributes.CRIT_DAMAGE);
+
+        // Add each value from the attribute to the chance value, which should (roughly) range in the scale of [0, 1].
+        if(instance != null) {
+            original = (float) instance.computeValue();
+        }
+
+        return (float) CriticalHitEvents.CALCULATE_MODIFIER.invoker().calculateCriticalModifier((PlayerEntity) (Object) this, attributed_cachedTarget, getMainHandStack(), original);
     }
 }

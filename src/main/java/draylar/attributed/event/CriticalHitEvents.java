@@ -32,6 +32,15 @@ public interface CriticalHitEvents {
                 }
             });
 
+    Event<Calculator> CALCULATE_MODIFIER = EventFactory.createArrayBacked(Calculator.class,
+            listeners -> (player, target, stack, modifier) -> {
+                for(Calculator event : listeners) {
+                    modifier = event.calculateCriticalModifier(player, target, stack, modifier);
+                }
+
+                return modifier;
+            });
+
     @FunctionalInterface
     interface Before {
         /**
@@ -75,5 +84,23 @@ public interface CriticalHitEvents {
          * @param stack the stack in the player's main hand, which was used to land the critical hit
          */
         void afterCriticalHit(PlayerEntity player, Entity target, ItemStack stack);
+    }
+
+    @FunctionalInterface
+    interface Calculator {
+        /**
+         * Called when the multiplier/modifier of a critical hit is calculated.
+         *
+         * <p>
+         * By default, the modifier of a critical hit is {@code 1.5D}.
+         * For an attack that deals 10 damage, this represents a boost of 5, for a final value of 15 damage.
+         *
+         * @param player player dealing the critical hit
+         * @param target target being attacked
+         * @param stack stack being used to land the critical hit (player's main-hand stack)
+         * @param modifier the current damage modifier of the critical hit
+         * @return an adjusted damage modifier for the critical hit
+         */
+        double calculateCriticalModifier(PlayerEntity player, Entity target, ItemStack stack, double modifier);
     }
 }
